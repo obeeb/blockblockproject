@@ -9,17 +9,16 @@
 
 <script>
 function startTime() {
-  const today = new Date();
-  let h = today.getHours();
-  let m = today.getMinutes();
-  let s = today.getSeconds();
-  m = checkTime(m);
+  const today = new Date(); //gets the current date and time.
+  let h = today.getHours(); //gets the hours of today
+  let m = today.getMinutes(); //gets the minutes of today
+  let s = today.getSeconds(); //gets the seconds of today.
+  m = checkTime(m); 
   s = checkTime(s);
   document.getElementById('txt').innerHTML =  h + ":" + m + ":" + s;
-  setTimeout(startTime, 1000);
 }
 
-function checkTime(i) {
+function checkTime(i) { //makes the numbers viewable in a clock way without looking ugly
   if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
   return i;
 }
