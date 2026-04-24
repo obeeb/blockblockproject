@@ -5,7 +5,9 @@
 
 <h2>Block Blockk</h2>
 
+<div id="clock"></div>
 <div id="txt"></div>
+
 
 <script>
   //reminder to add an arraylist of jolly messages 
@@ -18,7 +20,7 @@ function startTime() { //the function checks the current time and displays it on
   let s = today.getSeconds(); //gets the seconds of today.
   m = checkTime(m); 
   s = checkTime(s);
-  document.getElementById('txt').innerHTML =  h + ":" + m + ":" + s;
+  document.getElementById('clock').innerHTML =  h + ":" + m + ":" + s;
   setTimeout(startTime, 1000); //repeats this every second after you open the page.
 }
 
