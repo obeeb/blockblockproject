@@ -4,602 +4,229 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Head-Royce Live Display</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Nunito+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Block Schedule Display</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --green-dark:  #1a4228;
-    --green:       #1d5c34;
-    --green-mid:   #2a7048;
-    --green-light: #d4ead9;
-    --gold:        #f5c800;
-    --gold-dark:   #c9a200;
-    --gold-light:  #fff9d6;
-    --white:       #ffffff;
-    --off-white:   #f7f8f5;
-    --gray-1:      #e8ebe4;
-    --gray-2:      #c8cfc0;
-    --gray-3:      #8a9680;
-    --gray-4:      #4a5442;
-    --text:        #1a2418;
-    --text-muted:  #4a5442;
-    --text-faint:  #8a9680;
-    --red:         #c0392b;
-    --amber:       #e67e00;
-    --teal:        #1a7a6e;
-  }
+:root {
+  --green-dark:#1a4228;--green:#1d5c34;--green-mid:#2a7048;--green-light:#d4ead9;
+  --gold:#f5c800;--gold-dark:#c9a200;
+  --white:#ffffff;--off-white:#f7f8f5;
+  --gray-1:#e8ebe4;--gray-2:#c8cfc0;--gray-3:#8a9680;
+  --text:#1a2418;--text-muted:#4a5442;--text-faint:#8a9680;
+  --red:#c0392b;--amber:#e67e00;--teal:#1a7a6e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;background:var(--off-white);color:var(--text);font-family:'Nunito Sans',sans-serif;overflow:hidden}
+.screen{width:100vw;height:100vh;display:grid;grid-template-rows:72px 1fr;grid-template-columns:1fr 360px;grid-template-areas:"topbar topbar" "main sidebar"}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+/* TOPBAR */
+.topbar{grid-area:topbar;background:var(--green-dark);display:flex;align-items:center;padding:0 32px;gap:20px;position:relative}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--gold)}
+.logo-area{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.wordmark{display:flex;flex-direction:column;line-height:1}
+.wordmark .l1{font-family:'Nunito',sans-serif;font-size:16px;font-weight:900;letter-spacing:.06em;color:var(--white);text-transform:uppercase}
+.wordmark .l2{font-size:12px;font-weight:600;letter-spacing:.12em;color:var(--gold);text-transform:uppercase;margin-top:1px}
+.topbar-sep{width:1px;height:28px;background:rgba(255,255,255,0.15)}
+.date-pill{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:5px 12px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.75)}
+.clock-group{margin-left:auto;display:flex;align-items:baseline;gap:5px}
+#clock{font-family:'Nunito',monospace;font-size:36px;font-weight:800;color:var(--white);letter-spacing:-1px;line-height:1}
+#clock-ampm{font-size:14px;font-weight:700;color:var(--gold)}
 
-  html, body {
-    width: 100%; height: 100%;
-    background: var(--off-white);
-    color: var(--text);
-    font-family: 'Nunito Sans', sans-serif;
-    overflow: hidden;
-  }
+/* STATUS BAR */
 
-  .screen {
-    width: 100vw; height: 100vh;
-    display: grid;
-    grid-template-rows: 72px 1fr;
-    grid-template-columns: 1fr 360px;
-    grid-template-areas:
-      "topbar  topbar"
-      "main    sidebar";
-  }
+/* MAIN */
+.main{grid-area:main;display:flex;flex-direction:column;justify-content:center;padding:40px 52px;position:relative;overflow:hidden;background:var(--off-white)}
+.main::before{content:'';position:absolute;right:-60px;bottom:-60px;width:420px;height:420px;background:var(--green-light);border-radius:50%;opacity:.35;pointer-events:none}
+.mode-label{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--text-faint);margin-bottom:14px}
+.live-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.event-title-big{font-family:'Nunito',sans-serif;font-size:clamp(30px,4.2vw,62px);font-weight:900;line-height:1.05;letter-spacing:-.5px;color:var(--green-dark);margin-bottom:18px;max-width:840px;position:relative;z-index:1}
+.meta-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:28px;position:relative;z-index:1}
+.meta-chip{display:flex;align-items:center;gap:7px;background:var(--white);border:1.5px solid var(--gray-1);border-radius:99px;padding:7px 16px;font-size:14px;font-weight:600;color:var(--text-muted)}
+.time-block{position:relative;z-index:1;margin-bottom:28px}
+.time-label{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--text-faint);margin-bottom:6px}
+.time-value{font-family:'Nunito',sans-serif;font-size:clamp(52px,8vw,104px);font-weight:900;line-height:1;letter-spacing:-3px;transition:color .6s}
+.prog-track{margin-top:14px;width:100%;max-width:680px;height:6px;background:var(--gray-1);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;border-radius:99px;transition:width 1s linear,background-color .6s}
+.motivational{position:relative;z-index:1;font-size:17px;font-weight:600;font-style:italic;color:var(--text-faint);max-width:600px;line-height:1.55;margin-top:20px;padding-left:16px;border-left:3px solid var(--gold)}
+.idle-hero{font-family:'Nunito',sans-serif;font-size:clamp(22px,3vw,44px);font-weight:900;color:var(--green-dark);margin-bottom:10px;position:relative;z-index:1}
+.next-teaser{display:inline-flex;align-items:center;gap:14px;background:var(--white);border:2px solid var(--gray-1);border-left:4px solid var(--gold);border-radius:12px;padding:14px 20px;margin-top:18px;max-width:680px;position:relative;z-index:1}
+.next-lbl{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-dark);white-space:nowrap}
+.next-vdiv{width:1px;height:32px;background:var(--gray-1)}
+.next-title{font-size:16px;font-weight:700;color:var(--green-dark);margin-bottom:3px}
+.next-when{font-size:13px;font-weight:500;color:var(--text-faint)}
+.tmrw-list{display:flex;flex-direction:column;gap:6px;margin-top:20px;max-width:680px;position:relative;z-index:1}
+.tmrw-row{display:flex;align-items:center;gap:12px;padding:8px 14px;background:var(--white);border:1.5px solid var(--gray-1);border-radius:8px}
+.tmrw-time{font-size:12px;font-weight:700;color:var(--text-muted);white-space:nowrap;min-width:130px}
+.tmrw-name{font-size:13px;font-weight:600;color:var(--green-dark)}
+.section-hdr{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint);margin-bottom:10px;position:relative;z-index:1}
 
-  /* ══════════════════════════════════════
-     TOP BAR
-  ══════════════════════════════════════ */
-  .topbar {
-    grid-area: topbar;
-    background: var(--green-dark);
-    display: flex;
-    align-items: center;
-    padding: 0 32px;
-    gap: 20px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  /* gold accent stripe at very bottom of header */
-  .topbar::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 3px;
-    background: var(--gold);
-  }
-
-  .logo-area {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-shrink: 0;
-  }
-
-  /* SVG shield logo inline */
-  .shield-svg {
-    width: 38px; height: 44px;
-    flex-shrink: 0;
-  }
-
-  .school-wordmark {
-    display: flex;
-    flex-direction: column;
-    line-height: 1;
-  }
-
-  .school-wordmark .line1 {
-    font-family: 'Nunito', sans-serif;
-    font-size: 16px;
-    font-weight: 900;
-    letter-spacing: 0.06em;
-    color: var(--white);
-    text-transform: uppercase;
-  }
-
-  .school-wordmark .line2 {
-    font-family: 'Nunito', sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    color: var(--gold);
-    text-transform: uppercase;
-    margin-top: 1px;
-  }
-
-  .topbar-sep {
-    width: 1px; height: 28px;
-    background: rgba(255,255,255,0.15);
-    margin: 0 4px;
-  }
-
-  .date-pill {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 6px;
-    padding: 5px 12px;
-    font-size: 13px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.75);
-    letter-spacing: 0.03em;
-  }
-
-  .block-day-pill {
-    background: var(--gold);
-    border-radius: 6px;
-    padding: 5px 14px;
-    font-family: 'Nunito', sans-serif;
-    font-size: 13px;
-    font-weight: 800;
-    color: var(--green-dark);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .clock-group {
-    margin-left: auto;
-    display: flex;
-    align-items: baseline;
-    gap: 5px;
-  }
-
-  #clock {
-    font-family: 'Nunito', monospace;
-    font-size: 36px;
-    font-weight: 800;
-    color: var(--white);
-    letter-spacing: -1px;
-    line-height: 1;
-  }
-
-  #clock-ampm {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--gold);
-    letter-spacing: 0.06em;
-  }
-
-  /* ══════════════════════════════════════
-     MAIN
-  ══════════════════════════════════════ */
-  .main {
-    grid-area: main;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 40px 52px;
-    position: relative;
-    overflow: hidden;
-    background: var(--off-white);
-  }
-
-  /* subtle green leaf watermark */
-  .main::before {
-    content: '';
-    position: absolute;
-    right: -60px; bottom: -60px;
-    width: 420px; height: 420px;
-    background: var(--green-light);
-    border-radius: 50%;
-    opacity: 0.35;
-    pointer-events: none;
-  }
-
-  .mode-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--text-faint);
-    margin-bottom: 14px;
-  }
-
-  .live-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--green-mid);
-    
-  }
-
-
-
-  .event-title-big {
-    font-family: 'Nunito', sans-serif;
-    font-size: clamp(30px, 4.2vw, 62px);
-    font-weight: 900;
-    line-height: 1.05;
-    letter-spacing: -0.5px;
-    color: var(--green-dark);
-    margin-bottom: 18px;
-    max-width: 840px;
-    position: relative; z-index: 1;
-  }
-
-  .meta-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 28px;
-    position: relative; z-index: 1;
-  }
-
-  .meta-chip {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    background: var(--white);
-    border: 1.5px solid var(--gray-1);
-    border-radius: 99px;
-    padding: 7px 16px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-muted);
-  }
-
-  .meta-chip svg { opacity: 0.5; flex-shrink: 0; }
-
-  /* TIME REMAINING */
-  .time-block {
-    position: relative; z-index: 1;
-    margin-bottom: 28px;
-  }
-
-  .time-label {
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-faint);
-    margin-bottom: 6px;
-  }
-
-  .time-value {
-    font-family: 'Nunito', sans-serif;
-    font-size: clamp(52px, 8vw, 104px);
-    font-weight: 900;
-    line-height: 1;
-    letter-spacing: -3px;
-    transition: color 0.6s;
-  }
-
-  /* progress bar */
-  .prog-track {
-    margin-top: 14px;
-    width: 100%;
-    max-width: 680px;
-    height: 6px;
-    background: var(--gray-1);
-    border-radius: 99px;
-    overflow: hidden;
-  }
-
-  .prog-fill {
-    height: 100%;
-    border-radius: 99px;
-    transition: width 1s linear, background-color 0.6s;
-  }
-
-  /* motivational */
-  .motivational {
-    position: relative; z-index: 1;
-    font-size: 17px;
-    font-weight: 600;
-    font-style: italic;
-    color: var(--text-faint);
-    max-width: 600px;
-    line-height: 1.55;
-    margin-top: 20px;
-    padding-left: 16px;
-    border-left: 3px solid var(--gold);
-    transition: opacity 0.4s;
-  }
-
-  /* IDLE STATE */
-  .idle-hero {
-    font-family: 'Nunito', sans-serif;
-    font-size: clamp(22px, 3vw, 44px);
-    font-weight: 900;
-    color: var(--green-dark);
-    margin-bottom: 10px;
-    position: relative; z-index: 1;
-  }
-
-  .next-teaser {
-    display: inline-flex;
-    align-items: center;
-    gap: 14px;
-    background: var(--white);
-    border: 2px solid var(--gray-1);
-    border-left: 4px solid var(--gold);
-    border-radius: 12px;
-    padding: 14px 20px;
-    margin-top: 18px;
-    max-width: 680px;
-    position: relative; z-index: 1;
-  }
-
-  .next-lbl {
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--gold-dark);
-    white-space: nowrap;
-  }
-
-  .next-vdiv { width: 1px; height: 32px; background: var(--gray-1); }
-
-  .next-title { font-size: 16px; font-weight: 700; color: var(--green-dark); margin-bottom: 3px; }
-  .next-when  { font-size: 13px; font-weight: 500; color: var(--text-faint); }
-
-  /* ══════════════════════════════════════
-     SIDEBAR
-  ══════════════════════════════════════ */
-  .sidebar {
-    grid-area: sidebar;
-    background: var(--green-dark);
-    border-left: 3px solid var(--gold);
-    display: flex;
-    flex-direction: column;
-    padding: 24px 20px;
-    gap: 20px;
-    overflow: hidden;
-    position: relative;
-  }
-
-  /* faint circle decoration */
-  .sidebar::after {
-    content: '';
-    position: absolute;
-    bottom: -80px; right: -80px;
-    width: 260px; height: 260px;
-    border-radius: 50%;
-    border: 40px solid rgba(245,200,0,0.06);
-    pointer-events: none;
-  }
-
-  .sb-label {
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--gold);
-    margin-bottom: 10px;
-    opacity: 0.8;
-  }
-
-  /* block schedule */
-  .block-list { display: flex; flex-direction: column; gap: 3px; }
-
-  .block-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
-    border-radius: 8px;
-    border: 1px solid transparent;
-    transition: background 0.2s;
-  }
-
-  .block-row.current {
-    background: rgba(245,200,0,0.12);
-    border-color: rgba(245,200,0,0.3);
-  }
-
-  .block-row.past { opacity: 0.3; }
-
-  .block-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.2);
-    flex-shrink: 0;
-  }
-  .block-row.current .block-dot { background: var(--gold); }
-
-  .block-name {
-    font-size: 12px;
-    font-weight: 700;
-    color: rgba(255,255,255,0.85);
-    min-width: 46px;
-  }
-
-  .block-time {
-    font-size: 11px;
-    font-weight: 500;
-    color: rgba(255,255,255,0.4);
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* today events */
-  .today-list { display: flex; flex-direction: column; gap: 5px; overflow: hidden; flex: 1; }
-
-  .today-card {
-    padding: 9px 11px;
-    border-radius: 8px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
-    transition: background 0.2s;
-    flex-shrink: 0;
-  }
-
-  .today-card.current {
-    background: rgba(245,200,0,0.1);
-    border-color: rgba(245,200,0,0.3);
-  }
-
-  .today-card-title {
-    font-size: 12px;
-    font-weight: 700;
-    color: rgba(255,255,255,0.9);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: 2px;
-  }
-
-  .today-card-time {
-    font-size: 10px;
-    font-weight: 500;
-    color: rgba(255,255,255,0.4);
-  }
-
-  .no-events {
-    font-size: 12px;
-    color: rgba(255,255,255,0.3);
-    text-align: center;
-    padding: 16px 0;
-  }
-
-
-
-
-
+/* SIDEBAR */
+.sidebar{grid-area:sidebar;background:var(--green-dark);border-left:3px solid var(--gold);display:flex;flex-direction:column;padding:24px 20px;overflow:hidden;position:relative}
+.sidebar::after{content:'';position:absolute;bottom:-80px;right:-80px;width:260px;height:260px;border-radius:50%;border:40px solid rgba(245,200,0,0.06);pointer-events:none}
+.sb-label{font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);opacity:.8;margin-bottom:10px}
+.sb-divider{border:none;border-top:1px solid rgba(255,255,255,0.08);margin:14px 0}
+.today-list{display:flex;flex-direction:column;gap:5px;overflow:hidden}
+.today-card{padding:9px 11px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+.today-card.current{background:rgba(245,200,0,.1);border-color:rgba(245,200,0,.3)}
+.today-card-title{font-size:12px;font-weight:700;color:rgba(255,255,255,.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.today-card-time{font-size:10px;font-weight:500;color:rgba(255,255,255,.4)}
+.no-events{font-size:12px;color:rgba(255,255,255,.3);padding:8px 0}
 </style>
 </head>
 <body>
 <div class="screen">
-
-  <!-- TOP BAR -->
   <header class="topbar">
     <div class="logo-area">
-<img src="data:image/png;base64,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" style="height:42px;width:auto;" alt="HRS Logo">
-      <div class="school-wordmark">
-        <span class="line1">Head-Royce</span>
-        <span class="line2">School</span>
+      <img src="data:image/png;base64,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" style="height:42px;width:auto" alt="HRS">
+      <div class="wordmark">
+        <span class="l1">Head-Royce</span>
+        <span class="l2">School</span>
       </div>
     </div>
-
     <div class="topbar-sep"></div>
     <div class="date-pill" id="date-display"></div>
-
     <div class="clock-group">
       <span id="clock">00:00:00</span>
       <span id="clock-ampm">AM</span>
     </div>
   </header>
-
-  <!-- MAIN -->
-  <main class="main" id="main-area"></main>
-
-  <!-- SIDEBAR -->
+  <main class="main" id="main-area">
+    <div class="idle-hero">Loading schedule...</div>
+  </main>
   <aside class="sidebar">
-    <div style="display:flex;flex-direction:column;overflow:hidden;flex:1;gap:0">
-      <div>
-        <div class="sb-label">Today's Schedule</div>
-        <div class="today-list" id="today-list"></div>
-      </div>
-      <div style="border-top:1px solid rgba(255,255,255,0.08);margin-top:16px;padding-top:16px;overflow:hidden;flex:1;display:flex;flex-direction:column">
-        <div class="sb-label">Tomorrow</div>
-        <div class="today-list" id="tomorrow-list"></div>
-      </div>
+    <div>
+      <div class="sb-label" id="today-sb-label">Today's Schedule</div>
+      <div class="today-list" id="today-list"></div>
+    </div>
+    <hr class="sb-divider">
+    <div style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+      <div class="sb-label" id="tmrw-sb-label">Tomorrow</div>
+      <div class="today-list" id="tomorrow-list"></div>
     </div>
   </aside>
-
 </div>
 
 <script>
-// ── REAL HRS 8-DAY BLOCK SCHEDULE (from ICS)
-const BLOCK_SCHEDULE = {
-  1: [
-    {name:"A Block", start:"08:25", end:"09:35"},
-    {name:"Break", start:"09:35", end:"09:45"},
-    {name:"B Block", start:"09:45", end:"10:55"},
-    {name:"C Block", start:"11:00", end:"12:10"},
-    {name:"Lunch", start:"12:10", end:"12:55"},
-    {name:"D Block", start:"12:55", end:"14:05"},
-    {name:"E Block", start:"14:10", end:"15:20"},
-  ],
-  2: [
-    {name:"F Block", start:"08:25", end:"09:35"},
-    {name:"Break", start:"09:35", end:"09:45"},
-    {name:"G Block", start:"09:45", end:"10:55"},
-    {name:"A Block", start:"11:00", end:"12:10"},
-    {name:"Lunch", start:"12:10", end:"12:55"},
-    {name:"B Block", start:"12:55", end:"14:05"},
-    {name:"Assembly", start:"14:10", end:"14:40"},
-  ],
-  3: [
-    {name:"B Block", start:"08:25", end:"09:35"},
-    {name:"Break", start:"09:35", end:"09:45"},
-    {name:"C Block", start:"09:45", end:"10:55"},
-    {name:"D Block", start:"11:00", end:"12:10"},
-    {name:"Lunch", start:"12:10", end:"12:55"},
-    {name:"E Block", start:"12:55", end:"14:05"},
-    {name:"F Block", start:"14:10", end:"15:20"},
-  ],
-  4: [
-    {name:"C Block", start:"08:25", end:"09:35"},
-    {name:"Break", start:"09:35", end:"10:25"},
-    {name:"Grade Meeting", start:"10:25", end:"10:55"},
-    {name:"D Block", start:"11:00", end:"12:10"},
-    {name:"Lunch", start:"12:10", end:"12:55"},
-    {name:"E Block", start:"12:55", end:"14:05"},
-    {name:"F Block", start:"14:10", end:"15:20"},
-  ],
-  5: [
-    {name:"G Block", start:"08:25", end:"09:35"},
-    {name:"Break", start:"09:35", end:"09:45"},
-    {name:"A Block", start:"09:45", end:"10:55"},
-    {name:"B Block", start:"11:00", end:"12:10"},
-    {name:"Lunch", start:"12:10", end:"12:55"},
-    {name:"C Block", start:"12:55", end:"14:05"},
-    {name:"Assembly", start:"14:10", end:"14:40"},
-  ],
-  6: [
-    {name:"D Block", start:"08:25", end:"09:35"},
-    {name:"Break", start:"09:35", end:"09:45"},
-    {name:"E Block", start:"09:45", end:"10:55"},
-    {name:"F Block", start:"11:00", end:"12:10"},
-    {name:"Lunch", start:"12:10", end:"12:55"},
-    {name:"G Block", start:"12:55", end:"14:05"},
-    {name:"A Block", start:"14:10", end:"15:20"},
-  ],
-  7: [
-    {name:"E Block", start:"08:25", end:"09:35"},
-    {name:"Break", start:"09:35", end:"09:45"},
-    {name:"F Block", start:"09:45", end:"10:55"},
-    {name:"G Block", start:"11:00", end:"12:10"},
-    {name:"Lunch", start:"12:10", end:"12:55"},
-    {name:"A Block", start:"12:55", end:"14:05"},
-    {name:"Grade Meeting", start:"14:10", end:"14:40"},
-  ],
-  8: [
-    {name:"B Block", start:"08:25", end:"09:35"},
-    {name:"Break", start:"09:35", end:"09:45"},
-    {name:"C Block", start:"09:45", end:"10:55"},
-    {name:"D Block", start:"11:00", end:"12:10"},
-    {name:"Lunch", start:"12:10", end:"12:55"},
-    {name:"E Block", start:"12:55", end:"14:05"},
-    {name:"F Block", start:"14:10", end:"15:20"},
-  ],
-};
-// ── ROTATION (change ROTATION_START to first Day-1 of school year) ──
-const ROTATION_START = new Date(2026, 4, 1); // May 1, 2026 = Day 1
-const SKIP_DATES = new Set([]);
+// ══════════════════════════════════════
+// ICS PARSER — handles RRULE recurring events + EXDATE
+// ══════════════════════════════════════
+function parseICS(text) {
+  const events = [];
+  const rawBlocks = text.split('BEGIN:VEVENT');
 
-function getBlockDay(date) {
-  const d = new Date(date); d.setHours(0,0,0,0);
-  const start = new Date(ROTATION_START); start.setHours(0,0,0,0);
-  if (d < start) return null;
-  let count = 0;
-  const cur = new Date(start);
-  while (cur <= d) {
-    const dow = cur.getDay();
-    const iso = cur.toISOString().slice(0,10);
-    if (dow >= 1 && dow <= 5 && !SKIP_DATES.has(iso)) count++;
-    cur.setDate(cur.getDate()+1);
+  for (let i = 1; i < rawBlocks.length; i++) {
+    const b = rawBlocks[i];
+
+    const get = k => {
+      const m = b.match(new RegExp(k + '[^:\r\n]*:([^\r\n]+(?:\r?\n[ \t][^\r\n]*)*)'));
+      return m ? m[1].replace(/\r?\n[ \t]/g, '').trim() : '';
+    };
+
+    const clean = s => s.replace(/\\,/g,',').replace(/\\;/g,';').replace(/\\n/g,' ').replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
+
+    let title   = clean(get('SUMMARY') || '');
+    // Normalize names
+    if (/club/i.test(title)) title = 'Club';
+    if (/affinity/i.test(title)) title = 'Affinity';
+    if (/assembly continued|oh\/sh|office hours/i.test(title)) title = 'Office Hours';
+    if (/^assembly$/i.test(title)) title = 'Assembly';
+    if (/advising/i.test(title)) title = 'Advising';
+    if (/grade meeting/i.test(title)) title = 'Grade Meeting';
+    if (/^break$/i.test(title)) title = 'Break';
+    if (/^lunch$/i.test(title)) title = 'Lunch';
+    const startRaw = get('DTSTART');
+    const endRaw   = get('DTEND');
+    const rrule    = get('RRULE');
+    const exdateRaw = get('EXDATE');
+
+    if (!startRaw || !title) continue;
+
+    // Skip non-schedule entries
+    const skipWords = ['spring break','memorial day','meeting for test','woca','debate','planning','break/community','arrival','student leadership','bonus block','community meeting'];
+    if (skipWords.some(w => title.toLowerCase().includes(w))) continue;
+
+    const parseLocalDT = raw => {
+      const m = raw.match(/(\d{8})T(\d{6})/);
+      if (!m) return null;
+      return {
+        date: m[1],
+        time: m[2],
+        hhmm: m[2].slice(0,2) + ':' + m[2].slice(2,4),
+        h: parseInt(m[2].slice(0,2)),
+        min: parseInt(m[2].slice(2,4)),
+        totalMins: parseInt(m[2].slice(0,2))*60 + parseInt(m[2].slice(2,4))
+      };
+    };
+
+    const start = parseLocalDT(startRaw);
+    const end   = endRaw ? parseLocalDT(endRaw) : null;
+    if (!start) continue;
+
+    // Parse EXDATE list
+    const exdates = new Set();
+    if (exdateRaw) {
+      const matches = exdateRaw.matchAll(/(\d{8})T(\d{6})/g);
+      for (const m of matches) exdates.add(m[1] + 'T' + m[2]);
+    }
+    // Also check all EXDATE lines
+    const allExdates = [...b.matchAll(/EXDATE[^:]*:([^\r\n]+)/g)];
+    for (const ex of allExdates) {
+      const mms = ex[1].matchAll(/(\d{8})T(\d{6})/g);
+      for (const m of mms) exdates.add(m[1] + 'T' + m[2]);
+    }
+
+    // Parse RRULE
+    const bydayM = rrule.match(/BYDAY=([^;]+)/);
+    const untilM = rrule.match(/UNTIL=(\d{8})/);
+
+    const dayMap = {MO:1,TU:2,WE:3,TH:4,FR:5};
+    const byday = bydayM ? bydayM[1].split(',').map(d => dayMap[d]).filter(Boolean) : [];
+    const until = untilM ? untilM[1] : '29991231';
+
+    if (byday.length > 0) {
+      // Recurring weekly event — store once per day-of-week, with until + exdates
+      for (const dow of byday) {
+        events.push({ title, dow, start: start.hhmm, end: end ? end.hhmm : '', until, exdates, startDate: start.date });
+      }
+    } else {
+      // Single occurrence — get dow from date
+      const dt = new Date(+start.date.slice(0,4), +start.date.slice(4,6)-1, +start.date.slice(6,8));
+      const dow = dt.getDay(); // 0=Sun
+      if (dow >= 1 && dow <= 5) {
+        events.push({ title, dow, start: start.hhmm, end: end ? end.hhmm : '', until, exdates, startDate: start.date, single: true, singleDate: start.date });
+      }
+    }
   }
-  return count === 0 ? null : ((count-1) % 8) + 1;
+
+  return events;
 }
 
-// ── MESSAGES ──
+// Build schedule for a given date from parsed events
+function getScheduleForDate(events, date) {
+  const dow = date.getDay(); // 1=Mon...5=Fri
+  if (dow === 0 || dow === 6) return [];
+
+  const dateStr = date.getFullYear().toString() +
+    String(date.getMonth()+1).padStart(2,'0') +
+    String(date.getDate()).padStart(2,'0');
+
+  const todayEvents = events.filter(e => {
+    if (e.dow !== dow) return false;
+    if (e.until < dateStr) return false;
+    if (e.startDate > dateStr) return false;
+    if (e.single && e.singleDate !== dateStr) return false;
+    // Check exdate
+    const exKey = dateStr + 'T' + e.start.replace(':','') + '00';
+    if (e.exdates && e.exdates.has(exKey)) return false;
+    return true;
+  });
+
+  return todayEvents.sort((a,b) => a.start.localeCompare(b.start));
+}
+
+// ══════════════════════════════════════
+// MESSAGES
+// ══════════════════════════════════════
 const MSG = {
   ending: [
     "You are closer to the end than you have ever been.",
@@ -643,6 +270,13 @@ const MSG = {
     "The day happened and now it is done.",
     "You have reached the part of the day that takes place after school.",
   ],
+  weekend: [
+    "There are no blocks scheduled on weekends. This is by design.",
+    "The schedule does not apply today.",
+    "It is the weekend. School-related countdowns are suspended.",
+    "No blocks are occurring or will occur today.",
+    "This is a day off. The next blocks are on Monday.",
+  ],
 };
 
 let lastPool = null, curMsg = '';
@@ -651,7 +285,9 @@ function pickMsg(pool) {
   return curMsg;
 }
 
-// ── HELPERS ──
+// ══════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════
 function toMins(hhmm) { const [h,m]=hhmm.split(':').map(Number); return h*60+m; }
 function nowMins() { const n=new Date(); return n.getHours()*60+n.getMinutes()+n.getSeconds()/60; }
 function fmtSec(s) {
@@ -660,57 +296,15 @@ function fmtSec(s) {
   return `${m}:${String(ss).padStart(2,'0')}`;
 }
 function fmtTime12(hhmm) {
-  const [h,m] = hhmm.split(':').map(Number);
-  const ampm = h < 12 ? 'AM' : 'PM';
-  const h12 = h % 12 || 12;
-  return `${h12}:${String(m).padStart(2,'0')} ${ampm}`;
+  const [h,m]=hhmm.split(':').map(Number);
+  return `${h%12||12}:${String(m).padStart(2,'0')} ${h<12?'AM':'PM'}`;
 }
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function nextSchoolDay(date) {
   const d = new Date(date);
-  do { d.setDate(d.getDate() + 1); } while (d.getDay() === 0 || d.getDay() === 6);
+  do { d.setDate(d.getDate()+1); } while (d.getDay()===0||d.getDay()===6);
   return d;
 }
-
-// ── CLOCK ──
-function updateClock() {
-  const n=new Date(),h=n.getHours(),m=n.getMinutes(),s=n.getSeconds();
-  const h12=h%12||12;
-  document.getElementById('clock').textContent=`${String(h12).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  document.getElementById('clock-ampm').textContent=h<12?'AM':'PM';
-  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  document.getElementById('date-display').textContent=`${days[n.getDay()]}  ·  ${months[n.getMonth()]} ${n.getDate()}, ${n.getFullYear()}`;
-}
-
-// ── SIDEBAR: today + tomorrow blocks ──
-function renderDayBlocks(elId, dayNum) {
-  const el = document.getElementById(elId);
-  if (!dayNum || !BLOCK_SCHEDULE[dayNum]) {
-    el.innerHTML = '<div class="no-events">No school</div>';
-    return;
-  }
-  const nm = nowMins();
-  const isToday = elId === 'today-list';
-  el.innerHTML = BLOCK_SCHEDULE[dayNum].map(p => {
-    const isCur = isToday && nm >= toMins(p.start) && nm < toMins(p.end);
-    const isPast = isToday && nm >= toMins(p.end);
-    return `<div class="today-card ${isCur?'current':''}" style="${isPast?'opacity:0.35':''}">
-      <div class="today-card-title">${esc(p.name)}</div>
-      <div class="today-card-time">${fmtTime12(p.start)} – ${fmtTime12(p.end)}</div>
-    </div>`;
-  }).join('');
-}
-
-function renderTodaySidebar() {
-  const now = new Date();
-  const todayNum = getBlockDay(now);
-  const tmrwNum  = getBlockDay(nextSchoolDay(now));
-  renderDayBlocks('today-list',    todayNum);
-  renderDayBlocks('tomorrow-list', tmrwNum);
-}
-
-// ── MAIN RENDER ──
 function colorForMins(m) {
   if(m<5)  return {c:'var(--red)',   pool:MSG.ending};
   if(m<15) return {c:'var(--amber)', pool:MSG.soon};
@@ -718,29 +312,100 @@ function colorForMins(m) {
   return         {c:'var(--green)',  pool:MSG.early};
 }
 
-function renderMain(dayNum) {
-  const nm  = nowMins();
-  const area = document.getElementById('main-area');
+// ══════════════════════════════════════
+// CLOCK
+// ══════════════════════════════════════
+function updateClock() {
+  const n=new Date(),h=n.getHours(),m=n.getMinutes(),s=n.getSeconds(),h12=h%12||12;
+  document.getElementById('clock').textContent=`${String(h12).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  document.getElementById('clock-ampm').textContent=h<12?'AM':'PM';
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('date-display').textContent=`${days[n.getDay()]}  ·  ${months[n.getMonth()]} ${n.getDate()}, ${n.getFullYear()}`;
+}
 
+// ══════════════════════════════════════
+// SIDEBAR
+// ══════════════════════════════════════
+function renderSidebar(events) {
+  const now = new Date();
+  const dow = now.getDay();
+  const isWeekend = dow===0||dow===6;
+  const nextDay = nextSchoolDay(now);
+  const DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+  document.getElementById('today-sb-label').textContent = isWeekend ? 'Weekend' : "Today";
+  document.getElementById('tmrw-sb-label').textContent = DAY_NAMES[nextDay.getDay()];
+
+  const renderList = (elId, date) => {
+    const el = document.getElementById(elId);
+    const schedule = getScheduleForDate(events, date);
+    const isToday = date.toDateString() === now.toDateString();
+    const nm = nowMins();
+    if (!schedule.length) { el.innerHTML = '<div class="no-events">No school</div>'; return; }
+    el.innerHTML = schedule.map(e => {
+      const isCur = isToday && nm >= toMins(e.start) && nm < toMins(e.end);
+      const isPast = isToday && nm >= toMins(e.end);
+      return `<div class="today-card ${isCur?'current':''}" style="${isPast?'opacity:0.32':''}">
+        <div class="today-card-title">${esc(e.title)}</div>
+        <div class="today-card-time">${fmtTime12(e.start)} – ${fmtTime12(e.end)}</div>
+      </div>`;
+    }).join('');
+  };
+
+  renderList('today-list', now);
+  renderList('tomorrow-list', nextDay);
+}
+
+// ══════════════════════════════════════
+// MAIN AREA
+// ══════════════════════════════════════
+function renderMain(events) {
+  const now = new Date();
+  const nm = nowMins();
+  const area = document.getElementById('main-area');
+  const dow = now.getDay();
+  const isWeekend = dow===0||dow===6;
+
+  if (isWeekend) {
+    const nextDay = nextSchoolDay(now);
+    const nextSched = getScheduleForDate(events, nextDay);
+    const DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    let tmrwHtml = '';
+    if (nextSched.length) {
+      tmrwHtml = `<div class="section-hdr" style="margin-top:20px">${DAY_NAMES[nextDay.getDay()]}</div>
+        <div class="tmrw-list">
+          ${nextSched.map(e=>`<div class="tmrw-row">
+            <div class="tmrw-time">${fmtTime12(e.start)} – ${fmtTime12(e.end)}</div>
+            <div class="tmrw-name">${esc(e.title)}</div>
+          </div>`).join('')}
+        </div>`;
+    }
+    area.innerHTML = `
+      <div class="mode-label"><span class="live-dot" style="background:var(--gray-3)"></span><span style="color:var(--text-faint)">Weekend</span></div>
+      <div class="idle-hero">No school today.</div>
+      ${tmrwHtml}
+      <div class="motivational" style="margin-top:22px">${esc(pickMsg(MSG.weekend))}</div>`;
+    return;
+  }
+
+  const todaySchedule = getScheduleForDate(events, now);
 
   // Find active block
-  const schedule = dayNum && BLOCK_SCHEDULE[dayNum];
-  const activeBlock = schedule
-    ? schedule.find(p => nm >= toMins(p.start) && nm < toMins(p.end)) || null
-    : null;
+  const active = todaySchedule.find(e => nm >= toMins(e.start) && nm < toMins(e.end)) || null;
 
-  if (activeBlock) {
-    const rem   = Math.max(0, (toMins(activeBlock.end) - nm) * 60);
-    const total = (toMins(activeBlock.end) - toMins(activeBlock.start)) * 60;
-    const pct   = Math.min(100, ((total - rem) / total) * 100);
-    const {c, pool} = colorForMins(rem / 60);
+  if (active) {
+    const rem   = Math.max(0, (toMins(active.end) - nm) * 60);
+    const total = (toMins(active.end) - toMins(active.start)) * 60;
+    const pct   = Math.min(100, ((total-rem)/total)*100);
+    const {c, pool} = colorForMins(rem/60);
     area.innerHTML = `
-      <div class="mode-label"><span class="live-dot"></span><span style="color:var(--green-mid)">Now</span></div>
-      <div class="event-title-big">${esc(activeBlock.name)}</div>
+      <div class="mode-label"><span class="live-dot" style="background:var(--green-mid)"></span><span style="color:var(--green-mid)">Now</span></div>
+      <div class="event-title-big">${esc(active.title)}</div>
       <div class="meta-row">
         <div class="meta-chip">
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="6"/><path d="M8 5v3.5l2 1.5"/></svg>
-          ${fmtTime12(activeBlock.start)} – ${fmtTime12(activeBlock.end)}
+          ${fmtTime12(active.start)} – ${fmtTime12(active.end)}
         </div>
       </div>
       <div class="time-block">
@@ -752,12 +417,11 @@ function renderMain(dayNum) {
     return;
   }
 
-  // IDLE — find next block
-  const isAfterSchool = nm >= 15 * 60;
-  const pool = isAfterSchool ? MSG.closing : MSG.idle;
+  // Idle
+  const isAfter = nm >= 15*60;
+  const pool = isAfter ? MSG.closing : MSG.idle;
 
-  // Next block today
-  let nextBlock = schedule ? schedule.find(p => toMins(p.start) > nm) : null;
+  const nextBlock = todaySchedule.find(e => toMins(e.start) > nm);
   let nextHtml = '';
   if (nextBlock) {
     const diff = (toMins(nextBlock.start) - nm) * 60;
@@ -766,49 +430,63 @@ function renderMain(dayNum) {
       <span class="next-lbl">Up next</span>
       <div class="next-vdiv"></div>
       <div>
-        <div class="next-title">${esc(nextBlock.name)}</div>
+        <div class="next-title">${esc(nextBlock.title)}</div>
         <div class="next-when">${when}</div>
       </div>
     </div>`;
   }
 
-  // Tomorrow's blocks
-  const tmrw = nextSchoolDay(new Date());
-  const tmrwNum = getBlockDay(tmrw);
-  const tmrwBlocks = tmrwNum && BLOCK_SCHEDULE[tmrwNum] ? BLOCK_SCHEDULE[tmrwNum] : [];
+  const nextDay = nextSchoolDay(now);
+  const tmrwSched = getScheduleForDate(events, nextDay);
+  const DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   let tmrwHtml = '';
-  if (tmrwBlocks.length) {
-    const dayName = tmrw.toLocaleDateString('en-US', {weekday:'long'});
-    tmrwHtml = `<div style="margin-top:20px;max-width:680px;position:relative;z-index:1">
-      <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint);margin-bottom:10px">${dayName} · Day ${tmrwNum}</div>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        ${tmrwBlocks.map(p=>`<div style="display:flex;align-items:center;gap:12px;padding:8px 14px;background:var(--white);border:1.5px solid var(--gray-1);border-radius:8px">
-          <div style="font-size:12px;font-weight:700;color:var(--text-muted);white-space:nowrap;min-width:130px">${fmtTime12(p.start)} – ${fmtTime12(p.end)}</div>
-          <div style="font-size:13px;font-weight:600;color:var(--green-dark)">${esc(p.name)}</div>
+  if (tmrwSched.length && isAfter) {
+    tmrwHtml = `<div class="section-hdr" style="margin-top:24px">${DAY_NAMES[nextDay.getDay()]}</div>
+      <div class="tmrw-list">
+        ${tmrwSched.map(e=>`<div class="tmrw-row">
+          <div class="tmrw-time">${fmtTime12(e.start)} – ${fmtTime12(e.end)}</div>
+          <div class="tmrw-name">${esc(e.title)}</div>
         </div>`).join('')}
-      </div>
-    </div>`;
+      </div>`;
   }
 
   area.innerHTML = `
-    <div class="mode-label"><span class="live-dot" style="background:var(--gray-3)"></span><span style="color:var(--text-faint)">${isAfterSchool ? 'After School' : 'Between Blocks'}</span></div>
-    <div class="idle-hero">${isAfterSchool ? 'Great work today, HRS.' : 'No block in session right now.'}</div>
+    <div class="mode-label"><span class="live-dot" style="background:var(--gray-3)"></span><span style="color:var(--text-faint)">${isAfter?'After School':'Between Blocks'}</span></div>
+    <div class="idle-hero">${isAfter?'No more blocks today.':'No block in session right now.'}</div>
     ${nextHtml}
     ${tmrwHtml}
     <div class="motivational" style="margin-top:22px">${esc(pickMsg(pool))}</div>`;
 }
 
-// ── MAIN LOOP ──
-function tick(){
+// ══════════════════════════════════════
+// EMBEDDED ICS (from basic__3_.ics)
+// ══════════════════════════════════════
+const PRELOADED_ICS = "BEGIN:VCALENDAR\nPRODID:-//Google Inc//Google Calendar 70.9054//EN\nVERSION:2.0\nCALSCALE:GREGORIAN\nMETHOD:PUBLISH\nX-WR-CALNAME:(Schedule)-Upper School Block Schedule\nX-WR-TIMEZONE:America/Los_Angeles\nBEGIN:VTIMEZONE\nTZID:America/Los_Angeles\nX-LIC-LOCATION:America/Los_Angeles\nBEGIN:DAYLIGHT\nTZOFFSETFROM:-0800\nTZOFFSETTO:-0700\nTZNAME:PDT\nDTSTART:19700308T020000\nRRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=2SU\nEND:DAYLIGHT\nBEGIN:STANDARD\nTZOFFSETFROM:-0700\nTZOFFSETTO:-0800\nTZNAME:PST\nDTSTART:19701101T020000\nRRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU\nEND:STANDARD\nEND:VTIMEZONE\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220718T121000\nDTEND;TZID=America/Los_Angeles:20220718T125000\nRRULE:FREQ=WEEKLY;UNTIL=20220720T065959Z;BYDAY=FR,MO,TH,TU,WE\nDTSTAMP:20260529T152745Z\nUID:6000hddcaofv3q75ns9dbtoqq4@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165616Z\nLAST-MODIFIED:20220813T081854Z\nLOCATION:(Schedule)-Upper Block Schedule\\, (Schedule)-Upper School Block Sc\n hedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:Lunch\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210723T141500\nDTEND;TZID=America/Los_Angeles:20210723T152000\nRRULE:FREQ=WEEKLY;UNTIL=20210827T065959Z;BYDAY=FR\nDTSTAMP:20260529T152745Z\nUID:12glcsqnu3159pe5t240k16fe6@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165924Z\nLAST-MODIFIED:20210823T231821Z\nLOCATION:(Schedule)-Middle/Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:H Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220721T125500\nDTEND;TZID=America/Los_Angeles:20220721T140500\nRRULE:FREQ=WEEKLY;UNTIL=20260604T065959Z;BYDAY=TH\nEXDATE;TZID=America/Los_Angeles:20260409T125500\nDTSTAMP:20260529T152745Z\nUID:3v6oc2nfanp9k3088ts6cv9b8c@google.com\nCREATED:20220720T222434Z\nLAST-MODIFIED:20260318T213457Z\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:C Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220721T082500\nDTEND;TZID=America/Los_Angeles:20220721T093500\nRRULE:FREQ=WEEKLY;UNTIL=20260604T065959Z;BYDAY=TH\nEXDATE;TZID=America/Los_Angeles:20260409T082500\nDTSTAMP:20260529T152745Z\nUID:6rh79jv2lko2o6ei9ahojlspuu@google.com\nCREATED:20220720T222122Z\nLAST-MODIFIED:20260318T213451Z\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:G Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20230905T144500\nDTEND;TZID=America/Los_Angeles:20230905T152000\nRRULE:FREQ=WEEKLY;UNTIL=20260602T065959Z;BYDAY=TU\nEXDATE;TZID=America/Los_Angeles:20260407T144500\nDTSTAMP:20260529T152745Z\nUID:5vtp29a9qltrtkiuqei2a5qfce@google.com\nCREATED:20230905T172056Z\nLAST-MODIFIED:20260318T213435Z\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Club\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210721T125500\nDTEND;TZID=America/Los_Angeles:20210721T140000\nRRULE:FREQ=WEEKLY;UNTIL=20220720T065959Z;BYDAY=WE\nDTSTAMP:20260529T152745Z\nUID:2rnehil1vk1hed0bcl302m81mv@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165724Z\nLAST-MODIFIED:20220721T000045Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:F Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220725T125500\nDTEND;TZID=America/Los_Angeles:20220725T140500\nRRULE:FREQ=WEEKLY;UNTIL=20260601T065959Z;BYDAY=MO\nEXDATE;TZID=America/Los_Angeles:20260525T125500\nEXDATE;TZID=America/Los_Angeles:20260406T125500\nDTSTAMP:20260529T152745Z\nUID:6pek8ou6gt7hskf3c3rhqgsl0h@google.com\nCREATED:20220720T223543Z\nLAST-MODIFIED:20260318T213418Z\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:D Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210719T140000\nDTEND;TZID=America/Los_Angeles:20210719T141500\nRRULE:FREQ=WEEKLY;UNTIL=20220718T065959Z;BYDAY=FR,MO,TH,TU,WE\nDTSTAMP:20260529T152745Z\nUID:53ioeikkv3vs23hfs8vcgn3g5q@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165808Z\nLAST-MODIFIED:20220721T000829Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Break\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210720T083000\nDTEND;TZID=America/Los_Angeles:20210720T093500\nRRULE:FREQ=WEEKLY;UNTIL=20220719T065959Z;BYDAY=TU\nDTSTAMP:20260529T152745Z\nUID:6pk70g4fqc0t3ve41laufe66a1@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T164935Z\nLAST-MODIFIED:20220721T000829Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:F Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220720T105000\nDTEND;TZID=America/Los_Angeles:20220720T110000\nRRULE:FREQ=WEEKLY;UNTIL=20220721T065959Z;BYDAY=FR,MO,TH,TU,WE\nDTSTAMP:20260529T152745Z\nUID:3fkgmb82rqode00k7vvfedckmf_R20220720T175000@google.com\nCREATED:20220720T212805Z\nLAST-MODIFIED:20220813T081852Z\nLOCATION:(Schedule)-Upper School Block Schedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:Break\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220721T093500\nDTEND;TZID=America/Los_Angeles:20220721T094500\nRRULE:FREQ=WEEKLY;BYDAY=FR,MO,TH,TU,WE\nDTSTAMP:20260529T152745Z\nUID:1mb26tnp8o0fl1euomu4qg6h5f@google.com\nCREATED:20220720T222228Z\nLAST-MODIFIED:20230905T171725Z\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Break\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210719T093500\nDTEND;TZID=America/Los_Angeles:20210719T100000\nRRULE:FREQ=WEEKLY;UNTIL=20210823T065959Z;BYDAY=FR,MO,TH,TU,WE\nDTSTAMP:20260529T152745Z\nUID:2n3namvm1l0qeoncigvaupss2l@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165042Z\nLAST-MODIFIED:20210823T231253Z\nLOCATION:(Schedule)-Middle/Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Break/Community Programming/Office Hours\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220718T141000\nDTEND;TZID=America/Los_Angeles:20220718T152000\nRRULE:FREQ=WEEKLY;UNTIL=20220725T065959Z;BYDAY=MO\nDTSTAMP:20260529T152745Z\nUID:ko59mane40ea4cdhj8bpsno8t7@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165823Z\nLAST-MODIFIED:20220813T081839Z\nLOCATION:(Schedule)-Upper Block Schedule\\, (Schedule)-Upper School Block Sc\n hedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:E Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210719T100000\nDTEND;TZID=America/Los_Angeles:20210719T110500\nRRULE:FREQ=WEEKLY;UNTIL=20220718T065959Z;BYDAY=MO\nDTSTAMP:20260529T152745Z\nUID:4huhtis2v9eri9o65viojujlu0@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165106Z\nLAST-MODIFIED:20220721T000437Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:B Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220720T094500\nDTEND;TZID=America/Los_Angeles:20220720T102000\nRRULE:FREQ=WEEKLY;UNTIL=20260603T065959Z;BYDAY=WE\nEXDATE;TZID=America/Los_Angeles:20260408T094500\nDTSTAMP:20260529T152745Z\nUID:5f750m1bjvsr0jri290sv4dq81@google.com\nCREATED:20220720T214629Z\nLAST-MODIFIED:20260318T213440Z\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:Affinity\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220720T110000\nDTEND;TZID=America/Los_Angeles:20220720T121000\nRRULE:FREQ=WEEKLY;UNTIL=20220727T065959Z;BYDAY=WE\nDTSTAMP:20260529T152745Z\nUID:ach7ccr0p0bsha7ap1d6n6948s@google.com\nCREATED:20210719T165138Z\nLAST-MODIFIED:20220813T081844Z\nLOCATION:(Schedule)-Upper Block Schedule\\, (Schedule)-Upper School Block Sc\n hedule\nSEQUENCE:2\nSTATUS:CONFIRMED\nSUMMARY:D Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220720T121000\nDTEND;TZID=America/Los_Angeles:20220720T125000\nRRULE:FREQ=WEEKLY;UNTIL=20220721T065959Z;BYDAY=FR,MO,TH,TU,WE\nDTSTAMP:20260529T152745Z\nUID:6000hddcaofv3q75ns9dbtoqq4_R20220720T191000@google.com\nCREATED:20210719T165616Z\nLAST-MODIFIED:20220813T081854Z\nLOCATION:(Schedule)-Upper Block Schedule\\, (Schedule)-Upper School Block Sc\n hedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:Lunch\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220721T144500\nDTEND;TZID=America/Los_Angeles:20220721T152000\nRRULE:FREQ=WEEKLY;UNTIL=20260604T065959Z;BYDAY=TH\nEXDATE;TZID=America/Los_Angeles:20260409T144500\nDTSTAMP:20260529T152745Z\nUID:7a5jte7oglue2pb8ot5glha4o9@google.com\nCREATED:20220720T215601Z\nLAST-MODIFIED:20260318T213502Z\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Office Hours\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220718T082500\nDTEND;TZID=America/Los_Angeles:20220718T093500\nRRULE:FREQ=WEEKLY;UNTIL=20220725T065959Z;BYDAY=MO\nDTSTAMP:20260529T152745Z\nUID:45k38c3gc982qe1fr4sqdea05o@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T164924Z\nLAST-MODIFIED:20220813T081852Z\nLOCATION:(Schedule)-Upper Block Schedule\\, (Schedule)-Upper School Block Sc\n hedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:A Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220725T110000\nDTEND;TZID=America/Los_Angeles:20220725T121000\nRRULE:FREQ=WEEKLY;UNTIL=20260601T065959Z;BYDAY=MO\nEXDATE;TZID=America/Los_Angeles:20260406T110000\nEXDATE;TZID=America/Los_Angeles:20260525T110000\nDTSTAMP:20260529T152745Z\nUID:5cgo2bhu2k3627fst2rro1nceu@google.com\nCREATED:20220720T223522Z\nLAST-MODIFIED:20260318T213415Z\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:C Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210719T080000\nDTEND;TZID=America/Los_Angeles:20210719T083000\nRRULE:FREQ=WEEKLY;UNTIL=20210823T065959Z;BYDAY=FR,MO,TH,TU,WE\nDTSTAMP:20260529T152745Z\nUID:7g7ddbbs4ilbkb6v21d2n572v9@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T164844Z\nLAST-MODIFIED:20210823T231151Z\nLOCATION:(Schedule)-Middle/Upper Block Schedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:Arrival\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210719T111000\nDTEND;TZID=America/Los_Angeles:20210719T121500\nRRULE:FREQ=WEEKLY;UNTIL=20220718T065959Z;BYDAY=MO\nDTSTAMP:20260529T152745Z\nUID:25j2i7avn9reb8cmrnauit1dqs@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165306Z\nLAST-MODIFIED:20220721T000045Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:C Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220725T082500\nDTEND;TZID=America/Los_Angeles:20220725T093500\nRRULE:FREQ=WEEKLY;UNTIL=20260601T065959Z;BYDAY=MO\nEXDATE;TZID=America/Los_Angeles:20260525T082500\nEXDATE;TZID=America/Los_Angeles:20260406T082500\nDTSTAMP:20260529T152745Z\nUID:3e0mlbfq5ekvk196frg5fmltnq@google.com\nCREATED:20220720T223430Z\nLAST-MODIFIED:20260318T213410Z\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:A Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220718T140000\nDTEND;TZID=America/Los_Angeles:20220718T141000\nRRULE:FREQ=WEEKLY;UNTIL=20220720T065959Z;BYDAY=FR,MO,TH,TU,WE\nDTSTAMP:20260529T152745Z\nUID:eqlql9ic9hn067tm89i7ic3uu1@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165808Z\nLAST-MODIFIED:20220813T081836Z\nLOCATION:(Schedule)-Upper Block Schedule\\, (Schedule)-Upper School Block Sc\n hedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:Break\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220726T094500\nDTEND;TZID=America/Los_Angeles:20220726T105500\nRRULE:FREQ=WEEKLY;UNTIL=20260602T065959Z;BYDAY=TU\nEXDATE;TZID=America/Los_Angeles:20260407T094500\nDTSTAMP:20260529T152745Z\nUID:5gpuc9sr8vr5kkltg7d60q2j1d@google.com\nCREATED:20220720T223655Z\nLAST-MODIFIED:20260318T213426Z\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:G Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220722T082500\nDTEND;TZID=America/Los_Angeles:20220722T093500\nRRULE:FREQ=WEEKLY;UNTIL=20260605T065959Z;BYDAY=FR\nEXDATE;TZID=America/Los_Angeles:20260410T082500\nDTSTAMP:20260529T152745Z\nUID:4ktd3egk8q35r84kjrqgi0438o@google.com\nCREATED:20220720T222547Z\nLAST-MODIFIED:20260318T213504Z\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:D Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210824T094000\nDTEND;TZID=America/Los_Angeles:20210824T102000\nRRULE:FREQ=WEEKLY;UNTIL=20220719T065959Z;BYDAY=TU\nDTSTAMP:20260529T152745Z\nUID:601t8tjap11u8nhcd0khht4lbn@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210823T231316Z\nLAST-MODIFIED:20221104T165620Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Advising\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210719T121500\nDTEND;TZID=America/Los_Angeles:20210719T125500\nRRULE:FREQ=WEEKLY;UNTIL=20220718T065959Z;BYDAY=FR,MO,TH,TU,WE\nDTSTAMP:20260529T152745Z\nUID:3rd97qdn7aa1mlvg5vprvi69lq@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165616Z\nLAST-MODIFIED:20220721T000829Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Lunch\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220725T094500\nDTEND;TZID=America/Los_Angeles:20220725T105500\nRRULE:FREQ=WEEKLY;UNTIL=20260601T065959Z;BYDAY=MO\nEXDATE;TZID=America/Los_Angeles:20260406T094500\nEXDATE;TZID=America/Los_Angeles:20260525T094500\nDTSTAMP:20260529T152745Z\nUID:5vait4l312hinakp66s8dp6hei@google.com\nCREATED:20220720T223506Z\nLAST-MODIFIED:20260318T213413Z\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:B Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210722T111000\nDTEND;TZID=America/Los_Angeles:20210722T121500\nRRULE:FREQ=WEEKLY;UNTIL=20220721T065959Z;BYDAY=TH\nDTSTAMP:20260529T152745Z\nUID:1b75rvmavh3fvgjiqinp3smk09@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165427Z\nLAST-MODIFIED:20220720T235654Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:A Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210723T125500\nDTEND;TZID=America/Los_Angeles:20210723T140000\nRRULE:FREQ=WEEKLY;UNTIL=20220722T065959Z;BYDAY=FR\nDTSTAMP:20260529T152745Z\nUID:6521uptq9io2occk6otjam39ac@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165752Z\nLAST-MODIFIED:20220721T000829Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:G Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART:20260525T070000Z\nDTEND:20260526T070000Z\nDTSTAMP:20260529T152745Z\nUID:3e9mclug5fnjvovl6co18nou30@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20260318T213309Z\nLAST-MODIFIED:20260318T213311Z\nLOCATION:(Schedule)-Upper School Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Memorial Day\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART:20220722T171500Z\nDTEND:20220722T172000Z\nDTSTAMP:20260529T152745Z\nUID:6d2eeb2dqs9klf1eju74tcn58i@google.com\nCREATED:20220720T215727Z\nLAST-MODIFIED:20220720T215727Z\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Break\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210720T100000\nDTEND;TZID=America/Los_Angeles:20210720T110500\nRRULE:FREQ=WEEKLY;UNTIL=20210824T065959Z;BYDAY=TU\nDTSTAMP:20260529T152745Z\nUID:5a83fc39t6h4m7999gmkkkvmj1@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165122Z\nLAST-MODIFIED:20210823T231332Z\nLOCATION:(Schedule)-Middle/Upper Block Schedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:H Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210827T141500\nDTEND;TZID=America/Los_Angeles:20210827T143500\nRRULE:FREQ=WEEKLY;UNTIL=20220722T065959Z;BYDAY=FR\nDTSTAMP:20260529T152745Z\nUID:071ocvhtgb7tgp9ahj8kk2pvp2@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210823T232002Z\nLAST-MODIFIED:20220721T001612Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Advising\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210722T083000\nDTEND;TZID=America/Los_Angeles:20210722T093500\nRRULE:FREQ=WEEKLY;UNTIL=20220721T065959Z;BYDAY=TH\nDTSTAMP:20260529T152745Z\nUID:11bu80rqrccb266osehpuk2ujr@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T164958Z\nLAST-MODIFIED:20220720T235654Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:G Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220726T082500\nDTEND;TZID=America/Los_Angeles:20220726T093500\nRRULE:FREQ=WEEKLY;UNTIL=20260602T065959Z;BYDAY=TU\nEXDATE;TZID=America/Los_Angeles:20260407T082500\nDTSTAMP:20260529T152745Z\nUID:54h8b1s2c04f9kf6a4lq00m4p4@google.com\nCREATED:20220720T223633Z\nLAST-MODIFIED:20260318T213424Z\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:F Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210826T094000\nDTEND;TZID=America/Los_Angeles:20210826T102000\nRRULE:FREQ=WEEKLY;UNTIL=20220721T065959Z;BYDAY=TH\nDTSTAMP:20260529T152745Z\nUID:7o5e57dtvd72pp85to3rje08qr@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210823T231742Z\nLAST-MODIFIED:20220721T000437Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Affinity\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220718T094000\nDTEND;TZID=America/Los_Angeles:20220718T105000\nRRULE:FREQ=WEEKLY;UNTIL=20220725T065959Z;BYDAY=MO\nDTSTAMP:20260529T152745Z\nUID:7d5bpcoviqoh55pp9mel02pm9u@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165106Z\nLAST-MODIFIED:20220813T081841Z\nLOCATION:(Schedule)-Upper Block Schedule\\, (Schedule)-Upper School Block Sc\n hedule\nSEQUENCE:2\nSTATUS:CONFIRMED\nSUMMARY:B Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210719T083000\nDTEND;TZID=America/Los_Angeles:20210719T093500\nRRULE:FREQ=WEEKLY;UNTIL=20220718T065959Z;BYDAY=MO\nDTSTAMP:20260529T152745Z\nUID:3iahdhsimr72bjmbhvpsvdm9f6@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T164924Z\nLAST-MODIFIED:20220721T001220Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:A Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20250523T153000\nDTEND;TZID=America/Los_Angeles:20250523T173000\nRRULE:FREQ=WEEKLY;UNTIL=20250524T065959Z;BYDAY=FR\nDTSTAMP:20260529T152745Z\nORGANIZER;CN=elieg2031@headroyce.org:mailto:elieg2031@headroyce.org\nUID:sucldg51hmcams6hee6dsaluq9@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;CN=(Sch\n edule)-Upper School Block Schedule;X-NUM-GUESTS=0:mailto:c_188aajppcq1b4i4l\n gds6ba7qukqm4@resource.calendar.google.com\nATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=elieg2\n 031@headroyce.org;X-NUM-GUESTS=0:mailto:elieg2031@headroyce.org\nCREATED:20241017T220443Z\nLAST-MODIFIED:20250522T141202Z\nLOCATION:Head-Royce School\\, 4315 Lincoln Ave\\, Oakland\\, CA 94602\\, USA\\, \n (Schedule)-Upper School Block Schedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:Debate\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220725T141000\nDTEND;TZID=America/Los_Angeles:20220725T152000\nRRULE:FREQ=WEEKLY;UNTIL=20260601T065959Z;BYDAY=MO\nEXDATE;TZID=America/Los_Angeles:20260406T141000\nEXDATE;TZID=America/Los_Angeles:20260525T141000\nDTSTAMP:20260529T152745Z\nUID:15g43npm8tectr21ff3psske87@google.com\nCREATED:20220720T223603Z\nLAST-MODIFIED:20260318T213421Z\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:E Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210826T102500\nDTEND;TZID=America/Los_Angeles:20210826T110500\nRRULE:FREQ=WEEKLY;UNTIL=20220721T065959Z;BYDAY=TH\nDTSTAMP:20260529T152745Z\nUID:1dk7p4oroqriehbh92aja48glo@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210823T231800Z\nLAST-MODIFIED:20220721T001220Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Affinity\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220721T094500\nDTEND;TZID=America/Los_Angeles:20220721T105500\nRRULE:FREQ=WEEKLY;UNTIL=20260604T065959Z;BYDAY=TH\nEXDATE;TZID=America/Los_Angeles:20260409T094500\nDTSTAMP:20260529T152745Z\nUID:0k33i5ehs98560iq91pieffqjm@google.com\nCREATED:20220720T222250Z\nLAST-MODIFIED:20260318T213453Z\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:A Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210720T111000\nDTEND;TZID=America/Los_Angeles:20210720T121500\nRRULE:FREQ=WEEKLY;UNTIL=20220719T065959Z;BYDAY=TU\nDTSTAMP:20260529T152745Z\nUID:3l18ero069f3bavlam3p3of9k4@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165345Z\nLAST-MODIFIED:20220721T000045Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:G Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210722T141500\nDTEND;TZID=America/Los_Angeles:20210722T152000\nRRULE:FREQ=WEEKLY;UNTIL=20220721T065959Z;BYDAY=TH\nDTSTAMP:20260529T152745Z\nUID:456dldguv3ifsl4173i6kn9mtr@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165910Z\nLAST-MODIFIED:20220721T001220Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:C Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220719T094000\nDTEND;TZID=America/Los_Angeles:20220719T105000\nRRULE:FREQ=WEEKLY;UNTIL=20220726T065959Z;BYDAY=TU\nDTSTAMP:20260529T152745Z\nUID:ja9ae11cmk3mrj1b5jd2njqqm3@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165345Z\nLAST-MODIFIED:20220813T081842Z\nLOCATION:(Schedule)-Upper Block Schedule\\, (Schedule)-Upper School Block Sc\n hedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:G Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220718T105000\nDTEND;TZID=America/Los_Angeles:20220718T110000\nRRULE:FREQ=WEEKLY;UNTIL=20220719T065959Z;BYDAY=FR,MO,TH,TU,WE\nDTSTAMP:20260529T152745Z\nUID:3fkgmb82rqode00k7vvfedckmf@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20220720T212805Z\nLAST-MODIFIED:20220813T081852Z\nLOCATION:(Schedule)-Upper School Block Schedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:Break\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220720T141000\nDTEND;TZID=America/Los_Angeles:20220720T152000\nRRULE:FREQ=WEEKLY;UNTIL=20220727T065959Z;BYDAY=WE\nDTSTAMP:20260529T152745Z\nUID:q6tfj1hft42equ41fg5v4j4ohl@google.com\nCREATED:20210719T165724Z\nLAST-MODIFIED:20220813T081845Z\nLOCATION:(Schedule)-Upper Block Schedule\\, (Schedule)-Upper School Block Sc\n hedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:F Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210823T093500\nDTEND;TZID=America/Los_Angeles:20210823T100000\nRRULE:FREQ=WEEKLY;UNTIL=20210824T065959Z;BYDAY=FR,MO,TH,TU,WE\nDTSTAMP:20260529T152745Z\nUID:2n3namvm1l0qeoncigvaupss2l_R20210823T163500@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165042Z\nLAST-MODIFIED:20210823T231253Z\nLOCATION:(Schedule)-Middle/Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Break\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART:20260406T070000Z\nDTEND:20260411T070000Z\nDTSTAMP:20260529T152745Z\nUID:1c34dicsdbu4l2l3jbmi06aoqu@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20260318T213202Z\nLAST-MODIFIED:20260318T213323Z\nLOCATION:(Schedule)-Upper School Block Schedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:Spring Break\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210721T083000\nDTEND;TZID=America/Los_Angeles:20210721T093500\nRRULE:FREQ=WEEKLY;UNTIL=20220720T065959Z;BYDAY=WE\nDTSTAMP:20260529T152745Z\nUID:1rba5m9tqiukqq1rp8cft68qr3@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T164946Z\nLAST-MODIFIED:20220721T002003Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:C Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART:20241021T070000Z\nDTEND:20241022T070000Z\nDTSTAMP:20260529T152745Z\nORGANIZER;CN=samatarg2026@headroyce.org:mailto:samatarg2026@headroyce.org\nUID:t51l4au0pn6btsqof4bt03k284@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;CN=(Sch\n edule)-Upper School Block Schedule;X-NUM-GUESTS=0:mailto:c_188aajppcq1b4i4l\n gds6ba7qukqm4@resource.calendar.google.com\nATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;CN=eb\n e@headroyce.org;X-NUM-GUESTS=0:mailto:ebe@headroyce.org\nATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=samata\n rg2026@headroyce.org;X-NUM-GUESTS=0:mailto:samatarg2026@headroyce.org\nCREATED:20241015T191758Z\nLAST-MODIFIED:20241015T191758Z\nLOCATION:k.206\\, (Schedule)-Upper School Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Meeting for test\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220721T141000\nDTEND;TZID=America/Los_Angeles:20220721T144000\nRRULE:FREQ=WEEKLY;UNTIL=20260604T065959Z;BYDAY=TH\nEXDATE;TZID=America/Los_Angeles:20260409T141000\nDTSTAMP:20260529T152745Z\nUID:527kvj2m8brbtffde69b2la2mn@google.com\nCREATED:20220720T215443Z\nLAST-MODIFIED:20260318T213500Z\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Assembly\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210722T125500\nDTEND;TZID=America/Los_Angeles:20210722T140000\nRRULE:FREQ=WEEKLY;UNTIL=20220721T065959Z;BYDAY=TH\nDTSTAMP:20260529T152745Z\nUID:4e6i9678k76pf0u1g3ojer6og2@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165740Z\nLAST-MODIFIED:20220721T000045Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:B Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220720T140000\nDTEND;TZID=America/Los_Angeles:20220720T141000\nRRULE:FREQ=WEEKLY;UNTIL=20220721T065959Z;BYDAY=FR,MO,TH,TU,WE\nDTSTAMP:20260529T152745Z\nUID:eqlql9ic9hn067tm89i7ic3uu1_R20220720T210000@google.com\nCREATED:20210719T165808Z\nLAST-MODIFIED:20220813T081836Z\nLOCATION:(Schedule)-Upper Block Schedule\\, (Schedule)-Upper School Block Sc\n hedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:Break\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220727T125500\nDTEND;TZID=America/Los_Angeles:20220727T140500\nRRULE:FREQ=WEEKLY;UNTIL=20260603T065959Z;BYDAY=WE\nEXDATE;TZID=America/Los_Angeles:20260408T125500\nDTSTAMP:20260529T152745Z\nUID:69n5u5d34fithqsdpp2ob74ef2@google.com\nCREATED:20220720T224012Z\nLAST-MODIFIED:20260318T213446Z\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:E Block \nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220722T125500\nDTEND;TZID=America/Los_Angeles:20220722T140500\nRRULE:FREQ=WEEKLY;UNTIL=20260605T065959Z;BYDAY=FR\nEXDATE;TZID=America/Los_Angeles:20260410T125500\nDTSTAMP:20260529T152745Z\nUID:19rv0ilalte1qid1h6q3o70ges@google.com\nCREATED:20220720T222725Z\nLAST-MODIFIED:20260318T213513Z\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:F Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220719T110000\nDTEND;TZID=America/Los_Angeles:20220719T121000\nRRULE:FREQ=WEEKLY;UNTIL=20220726T065959Z;BYDAY=TU\nDTSTAMP:20260529T152745Z\nUID:51tusk29lq4didcledpotps4qd@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165720Z\nLAST-MODIFIED:20220813T081837Z\nLOCATION:(Schedule)-Upper Block Schedule\\, (Schedule)-Upper School Block Sc\n hedule\nSEQUENCE:2\nSTATUS:CONFIRMED\nSUMMARY:A Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210827T144000\nDTEND;TZID=America/Los_Angeles:20210827T152000\nRRULE:FREQ=WEEKLY;UNTIL=20220722T065959Z;BYDAY=FR\nDTSTAMP:20260529T152745Z\nUID:2m3s31to0nck3v9jervbokbapt@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210823T232022Z\nLAST-MODIFIED:20220721T000437Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Clubs\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210721T100000\nDTEND;TZID=America/Los_Angeles:20210721T110500\nRRULE:FREQ=WEEKLY;UNTIL=20220720T065959Z;BYDAY=WE\nDTSTAMP:20260529T152745Z\nUID:3ddf8lqisl4cfsko8b2eoggjsf@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165138Z\nLAST-MODIFIED:20220721T001220Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:D Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART:20251110T201300Z\nDTEND:20251110T205200Z\nDTSTAMP:20260529T152745Z\nORGANIZER;CN=iwid2028@headroyce.org:mailto:iwid2028@headroyce.org\nUID:0uqh5u34kln0role008j3lecnl@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=(Schedul\n e)-Upper School Block Schedule;X-NUM-GUESTS=0:mailto:c_188aajppcq1b4i4lgds6\n ba7qukqm4@resource.calendar.google.com\nATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=miah20\n 27@headroyce.org;X-NUM-GUESTS=0:mailto:miah2027@headroyce.org\nATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=iwid20\n 28@headroyce.org;X-NUM-GUESTS=0:mailto:iwid2028@headroyce.org\nATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=miras2\n 028@headroyce.org;X-NUM-GUESTS=0:mailto:miras2028@headroyce.org\nATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;CN=ma\n likam2028@headroyce.org;X-NUM-GUESTS=0:mailto:malikam2028@headroyce.org\nATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;CN=na\n taliej2027@headroyce.org;X-NUM-GUESTS=0:mailto:nataliej2027@headroyce.org\nATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=DECLINED;CN=ctran@\n headroyce.org;X-NUM-GUESTS=0;X-RESPONSE-COMMENT=\"Hey folks. Ms. Liu and I h\n ave a math department meeting on Monday at lunch. Feel free to meet without\n  us or we can meet together Wednesday at Lunch. \":mailto:ctran@headroyce.or\n g\nATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;CN=ql\n iu@headroyce.org;X-NUM-GUESTS=0:mailto:qliu@headroyce.org\nCREATED:20250922T164351Z\nLAST-MODIFIED:20251107T022304Z\nLOCATION:(Schedule)-Upper School Block Schedule\nSEQUENCE:4\nSTATUS:CONFIRMED\nSUMMARY:WoCa Planning meeting\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220727T141000\nDTEND;TZID=America/Los_Angeles:20220727T152000\nRRULE:FREQ=WEEKLY;UNTIL=20260603T065959Z;BYDAY=WE\nEXDATE;TZID=America/Los_Angeles:20260408T141000\nDTSTAMP:20260529T152745Z\nUID:0gr8vo64n5smda3nrm8ah04933@google.com\nCREATED:20220720T224028Z\nLAST-MODIFIED:20260318T213448Z\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:F Block \nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220720T125000\nDTEND;TZID=America/Los_Angeles:20220720T140000\nRRULE:FREQ=WEEKLY;UNTIL=20220727T065959Z;BYDAY=WE\nDTSTAMP:20260529T152745Z\nUID:ob61jhkhj1aflm92bo8j3ufp23@google.com\nCREATED:20210719T165409Z\nLAST-MODIFIED:20220813T081840Z\nLOCATION:(Schedule)-Upper Block Schedule\\, (Schedule)-Upper School Block Sc\n hedule\nSEQUENCE:2\nSTATUS:CONFIRMED\nSUMMARY:E Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20250110T153000\nDTEND;TZID=America/Los_Angeles:20250110T173000\nRRULE:FREQ=WEEKLY;UNTIL=20250523T065959Z;BYDAY=FR\nEXDATE;TZID=America/Los_Angeles:20250117T153000\nDTSTAMP:20260529T152745Z\nORGANIZER;CN=elieg2031@headroyce.org:mailto:elieg2031@headroyce.org\nUID:1i1758h9322fha4cb7eb03pl62_R20250110T233000@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;CN=(Sch\n edule)-Upper School Block Schedule;X-NUM-GUESTS=0:mailto:c_188aajppcq1b4i4l\n gds6ba7qukqm4@resource.calendar.google.com\nATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=elieg2\n 031@headroyce.org;X-NUM-GUESTS=0:mailto:elieg2031@headroyce.org\nCREATED:20241017T220443Z\nLAST-MODIFIED:20250522T141202Z\nLOCATION:Head-Royce School\\, 4315 Lincoln Ave\\, Oakland\\, CA 94602\\, USA\\, \n (Schedule)-Upper School Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Debate\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220722T102500\nDTEND;TZID=America/Los_Angeles:20220722T105500\nRRULE:FREQ=WEEKLY;UNTIL=20260605T065959Z;BYDAY=FR\nEXDATE;TZID=America/Los_Angeles:20260410T102500\nDTSTAMP:20260529T152745Z\nUID:47esdg2eo37s1kidf40vsujo1c@google.com\nCREATED:20220720T215756Z\nLAST-MODIFIED:20260318T213507Z\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:Affinity\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210722T100000\nDTEND;TZID=America/Los_Angeles:20210722T110500\nRRULE:FREQ=WEEKLY;UNTIL=20210826T065959Z;BYDAY=TH\nDTSTAMP:20260529T152745Z\nUID:78csurjlvam7cui48i5un70lbv@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165157Z\nLAST-MODIFIED:20210823T231712Z\nLOCATION:(Schedule)-Middle/Upper Block Schedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:H Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210824T102500\nDTEND;TZID=America/Los_Angeles:20210824T110500\nRRULE:FREQ=WEEKLY;UNTIL=20220719T065959Z;BYDAY=TU\nDTSTAMP:20260529T152745Z\nUID:57fsmkmuha6qeg51tc4ondjfdp@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210823T231407Z\nLAST-MODIFIED:20220721T000045Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Student Leadership/Study Hall\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220727T110000\nDTEND;TZID=America/Los_Angeles:20220727T121000\nRRULE:FREQ=WEEKLY;UNTIL=20260603T065959Z;BYDAY=WE\nEXDATE;TZID=America/Los_Angeles:20260408T110000\nDTSTAMP:20260529T152745Z\nUID:5jpvu7nggv5os1rqacht8sh9fv@google.com\nCREATED:20220720T223950Z\nLAST-MODIFIED:20260318T213444Z\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:D Block \nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220718T110000\nDTEND;TZID=America/Los_Angeles:20220718T121000\nRRULE:FREQ=WEEKLY;UNTIL=20220725T065959Z;BYDAY=MO\nDTSTAMP:20260529T152745Z\nUID:q07skil61qp42cbe3qp6i0egpa@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165306Z\nLAST-MODIFIED:20220813T081847Z\nLOCATION:(Schedule)-Upper Block Schedule\\, (Schedule)-Upper School Block Sc\n hedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:C Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220720T102500\nDTEND;TZID=America/Los_Angeles:20220720T105500\nRRULE:FREQ=WEEKLY;UNTIL=20260603T065959Z;BYDAY=WE\nEXDATE;TZID=America/Los_Angeles:20260408T102500\nDTSTAMP:20260529T152745Z\nUID:6brapk9hom7fcom6lvjiatf60q@google.com\nCREATED:20210823T231612Z\nLAST-MODIFIED:20260318T213442Z\nLOCATION:(Schedule)-Upper Block Schedule\\, (Schedule)-Upper School Block Sc\n hedule\nSEQUENCE:3\nSTATUS:CONFIRMED\nSUMMARY:Grade Meeting\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220719T105000\nDTEND;TZID=America/Los_Angeles:20220719T110000\nRRULE:FREQ=WEEKLY;UNTIL=20220720T065959Z;BYDAY=FR,MO,TH,TU,WE\nDTSTAMP:20260529T152745Z\nUID:3fkgmb82rqode00k7vvfedckmf_R20220719T175000@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20220720T212805Z\nLAST-MODIFIED:20220813T081852Z\nLOCATION:(Schedule)-Upper School Block Schedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:Break\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210825T093500\nDTEND;TZID=America/Los_Angeles:20210825T100000\nRRULE:FREQ=WEEKLY;WKST=SU;UNTIL=20220718T065959Z;BYDAY=FR,MO,WE\nDTSTAMP:20260529T152745Z\nUID:1a580okiftubeggktkujf1dtcu@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210823T231505Z\nLAST-MODIFIED:20221104T165559Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Break\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210719T141500\nDTEND;TZID=America/Los_Angeles:20210719T152000\nRRULE:FREQ=WEEKLY;UNTIL=20220718T065959Z;BYDAY=MO\nDTSTAMP:20260529T152745Z\nUID:47a3u2qhaerb6p59kdvr8benvl@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165823Z\nLAST-MODIFIED:20220720T235654Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:E Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210825T141500\nDTEND;TZID=America/Los_Angeles:20210825T143500\nRRULE:FREQ=WEEKLY;UNTIL=20220720T065959Z;BYDAY=WE\nDTSTAMP:20260529T152745Z\nUID:25hcbt57l72ovejs0lu1if713i@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210823T231612Z\nLAST-MODIFIED:20220721T000437Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Community Meeting\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20230905T141000\nDTEND;TZID=America/Los_Angeles:20230905T144000\nRRULE:FREQ=WEEKLY;UNTIL=20260602T065959Z;BYDAY=TU\nEXDATE;TZID=America/Los_Angeles:20260407T141000\nDTSTAMP:20260529T152745Z\nUID:0kkqp813hao2mqo1vfvv391p1k@google.com\nCREATED:20230905T172039Z\nLAST-MODIFIED:20260318T213432Z\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Advising\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210825T144000\nDTEND;TZID=America/Los_Angeles:20210825T152000\nRRULE:FREQ=WEEKLY;UNTIL=20210915T065959Z;BYDAY=WE\nDTSTAMP:20260529T152745Z\nORGANIZER;CN=Shahana Sarkar:mailto:ssarkar@headroyce.org\nUID:3ma375eu5tnsc984letvjb052q@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=DECLINED;CN=(Schedul\n e)-Upper School Block Schedule;X-NUM-GUESTS=0:mailto:c_188aajppcq1b4i4lgds6\n ba7qukqm4@resource.calendar.google.com\nATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=Shahan\n a Sarkar;X-NUM-GUESTS=0:mailto:ssarkar@headroyce.org\nCREATED:20210910T192834Z\nLAST-MODIFIED:20221104T165601Z\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Bonus Block - C For HC GeoH\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220722T141000\nDTEND;TZID=America/Los_Angeles:20220722T152000\nRRULE:FREQ=WEEKLY;UNTIL=20260605T065959Z;BYDAY=FR\nEXDATE;TZID=America/Los_Angeles:20260410T141000\nDTSTAMP:20260529T152745Z\nUID:7cdufesq4glromonem7n63puk8@google.com\nCREATED:20220720T222751Z\nLAST-MODIFIED:20260318T213516Z\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:G Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220718T125000\nDTEND;TZID=America/Los_Angeles:20220718T140000\nRRULE:FREQ=WEEKLY;UNTIL=20220725T065959Z;BYDAY=MO\nDTSTAMP:20260529T152745Z\nUID:71rcmaki20tr11hbfijofvj8ub@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165645Z\nLAST-MODIFIED:20220813T081833Z\nLOCATION:(Schedule)-Upper Block Schedule\\, (Schedule)-Upper School Block Sc\n hedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:D Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220726T125500\nDTEND;TZID=America/Los_Angeles:20220726T140500\nRRULE:FREQ=WEEKLY;UNTIL=20260602T065959Z;BYDAY=TU\nEXDATE;TZID=America/Los_Angeles:20260407T125500\nDTSTAMP:20260529T152745Z\nUID:2afkm2svmcbbslppfi3l28uign@google.com\nCREATED:20220720T223735Z\nLAST-MODIFIED:20260318T213430Z\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:B Block \nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210825T144000\nDTEND;TZID=America/Los_Angeles:20210825T152000\nRRULE:FREQ=WEEKLY;UNTIL=20220720T065959Z;BYDAY=WE\nDTSTAMP:20260529T152745Z\nUID:6qjql7jap88cepj9u1jr1qqgqk@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210823T231653Z\nLAST-MODIFIED:20220721T000437Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Bonus Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220726T110000\nDTEND;TZID=America/Los_Angeles:20220726T121000\nRRULE:FREQ=WEEKLY;UNTIL=20260609T065959Z;BYDAY=TU\nEXDATE;TZID=America/Los_Angeles:20260407T110000\nEXDATE;TZID=America/Los_Angeles:20260602T110000\nDTSTAMP:20260529T152745Z\nUID:78r9iejmqb049cpso111iabm0v@google.com\nCREATED:20220720T223718Z\nLAST-MODIFIED:20260318T213521Z\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:A Block \nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220722T094500\nDTEND;TZID=America/Los_Angeles:20220722T102000\nRRULE:FREQ=WEEKLY;UNTIL=20260612T065959Z;BYDAY=FR\nEXDATE;TZID=America/Los_Angeles:20260605T094500\nEXDATE;TZID=America/Los_Angeles:20260410T094500\nDTSTAMP:20260529T152745Z\nUID:4qgm889ia24095vmlvr502si6j@google.com\nCREATED:20220720T222625Z\nLAST-MODIFIED:20260318T213530Z\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:Club\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210719T125500\nDTEND;TZID=America/Los_Angeles:20210719T140000\nRRULE:FREQ=WEEKLY;UNTIL=20220718T065959Z;BYDAY=MO\nDTSTAMP:20260529T152745Z\nUID:7dihdu623dlk1l3jii5bmdadpc@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165645Z\nLAST-MODIFIED:20220721T001220Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:D Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210723T100000\nDTEND;TZID=America/Los_Angeles:20210723T110500\nRRULE:FREQ=WEEKLY;UNTIL=20220722T065959Z;BYDAY=FR\nDTSTAMP:20260529T152745Z\nUID:36idvtf1dcvhnaes7uj0ns500v@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165232Z\nLAST-MODIFIED:20220721T001612Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:E Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220722T110000\nDTEND;TZID=America/Los_Angeles:20220722T121000\nRRULE:FREQ=WEEKLY;UNTIL=20260605T065959Z;BYDAY=FR\nEXDATE;TZID=America/Los_Angeles:20260410T110000\nDTSTAMP:20260529T152745Z\nUID:7la6le2n2tuvh6f88cv7rf2cju@google.com\nCREATED:20220720T222658Z\nLAST-MODIFIED:20260318T213510Z\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:E Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220720T082500\nDTEND;TZID=America/Los_Angeles:20220720T093500\nRRULE:FREQ=WEEKLY;UNTIL=20220727T065959Z;BYDAY=WE\nDTSTAMP:20260529T152745Z\nUID:gt1449ms0k9c0r509sfdbp4ene@google.com\nCREATED:20210719T164946Z\nLAST-MODIFIED:20220813T081850Z\nLOCATION:(Schedule)-Upper Block Schedule\\, (Schedule)-Upper School Block Sc\n hedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:C Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220719T082500\nDTEND;TZID=America/Los_Angeles:20220719T093500\nRRULE:FREQ=WEEKLY;UNTIL=20220726T065959Z;BYDAY=TU\nDTSTAMP:20260529T152745Z\nUID:38ujl6hub3qc9hgjpj90d7vjga@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T164935Z\nLAST-MODIFIED:20220813T081849Z\nLOCATION:(Schedule)-Upper Block Schedule\\, (Schedule)-Upper School Block Sc\n hedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:F Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210723T111000\nDTEND;TZID=America/Los_Angeles:20210723T121500\nRRULE:FREQ=WEEKLY;UNTIL=20220722T065959Z;BYDAY=FR\nDTSTAMP:20260529T152745Z\nUID:44cnj4d0mdqscsl5cifik8fq7r@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165444Z\nLAST-MODIFIED:20220721T001612Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:F Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220721T110000\nDTEND;TZID=America/Los_Angeles:20220721T121000\nRRULE:FREQ=WEEKLY;UNTIL=20260611T065959Z;BYDAY=TH\nEXDATE;TZID=America/Los_Angeles:20260409T110000\nEXDATE;TZID=America/Los_Angeles:20260604T110000\nDTSTAMP:20260529T152745Z\nUID:21ju607khq3s3b4go5tk45vb1r@google.com\nCREATED:20220720T222334Z\nLAST-MODIFIED:20260318T213527Z\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:B Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220721T121000\nDTEND;TZID=America/Los_Angeles:20220721T125500\nRRULE:FREQ=WEEKLY;BYDAY=FR,MO,TH,TU,WE\nDTSTAMP:20260529T152745Z\nUID:2u7qgtuaa7q4c283n6j1omkvj0@google.com\nCREATED:20220720T222401Z\nLAST-MODIFIED:20230905T171814Z\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:Lunch\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210721T111000\nDTEND;TZID=America/Los_Angeles:20210721T121500\nRRULE:FREQ=WEEKLY;UNTIL=20220720T065959Z;BYDAY=WE\nDTSTAMP:20260529T152745Z\nUID:4oguvdoodi40s25r5sqm84ibt0@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165409Z\nLAST-MODIFIED:20220721T001612Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:E Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210720T141500\nDTEND;TZID=America/Los_Angeles:20210720T152000\nRRULE:FREQ=WEEKLY;UNTIL=20220719T065959Z;BYDAY=TU\nDTSTAMP:20260529T152745Z\nUID:0e0naspn09r55d7o5jqcaknfpi@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165836Z\nLAST-MODIFIED:20220720T235654Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:B Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210723T083000\nDTEND;TZID=America/Los_Angeles:20210723T093500\nRRULE:FREQ=WEEKLY;UNTIL=20220722T065959Z;BYDAY=FR\nDTSTAMP:20260529T152745Z\nUID:6sb6g11rcfr1h3sb2bamuo46ef@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165017Z\nLAST-MODIFIED:20220721T001612Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:D Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220718T093500\nDTEND;TZID=America/Los_Angeles:20220718T094000\nRRULE:FREQ=WEEKLY;UNTIL=20220720T065959Z;BYDAY=FR,MO,TH,TU,WE\nDTSTAMP:20260529T152745Z\nUID:bs2fho54it9sgffctq83hicsa8@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210823T231505Z\nLAST-MODIFIED:20221104T165622Z\nLOCATION:(Schedule)-Upper Block Schedule\\, (Schedule)-Upper School Block Sc\n hedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:Break\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210721T141500\nDTEND;TZID=America/Los_Angeles:20210721T152000\nRRULE:FREQ=WEEKLY;UNTIL=20210825T065959Z;BYDAY=WE\nDTSTAMP:20260529T152745Z\nUID:55uoerev3t3gmn2l632mfn6f5u@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165856Z\nLAST-MODIFIED:20210823T231544Z\nLOCATION:(Schedule)-Middle/Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:H Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220720T093500\nDTEND;TZID=America/Los_Angeles:20220720T094000\nRRULE:FREQ=WEEKLY;UNTIL=20220721T065959Z;BYDAY=FR,MO,TH,TU,WE\nDTSTAMP:20260529T152745Z\nUID:bs2fho54it9sgffctq83hicsa8_R20220720T163500@google.com\nCREATED:20210823T231505Z\nLAST-MODIFIED:20221104T165624Z\nLOCATION:(Schedule)-Upper Block Schedule\\, (Schedule)-Upper School Block Sc\n hedule\nSEQUENCE:1\nSTATUS:CONFIRMED\nSUMMARY:Break\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220727T082500\nDTEND;TZID=America/Los_Angeles:20220727T093500\nRRULE:FREQ=WEEKLY;UNTIL=20260603T065959Z;BYDAY=WE\nEXDATE;TZID=America/Los_Angeles:20260408T082500\nDTSTAMP:20260529T152745Z\nUID:5o8lb83e4of3hsaoo4lk2qlhr3@google.com\nCREATED:20220720T223903Z\nLAST-MODIFIED:20260318T213438Z\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:C Block \nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20220719T125000\nDTEND;TZID=America/Los_Angeles:20220719T140000\nRRULE:FREQ=WEEKLY;UNTIL=20220726T065959Z;BYDAY=TU\nDTSTAMP:20260529T152745Z\nUID:qpt6d9vhnjeosa3cfc4n1atpfv@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165836Z\nLAST-MODIFIED:20220813T081846Z\nLOCATION:(Schedule)-Upper Block Schedule\\, (Schedule)-Upper School Block Sc\n hedule\nSEQUENCE:2\nSTATUS:CONFIRMED\nSUMMARY:B Block\nTRANSP:OPAQUE\nEND:VEVENT\nBEGIN:VEVENT\nDTSTART;TZID=America/Los_Angeles:20210720T125500\nDTEND;TZID=America/Los_Angeles:20210720T140000\nRRULE:FREQ=WEEKLY;UNTIL=20220719T065959Z;BYDAY=TU\nDTSTAMP:20260529T152745Z\nUID:3lt51nv7fu8oprehir6inbgggi@google.com\nATTENDEE;CUTYPE=RESOURCE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=c_188aaj\n ppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com;X-NUM-GUESTS=0:mailto:\n c_188aajppcq1b4i4lgds6ba7qukqm4@resource.calendar.google.com\nCREATED:20210719T165720Z\nLAST-MODIFIED:20220721T002003Z\nLOCATION:(Schedule)-Upper Block Schedule\nSEQUENCE:0\nSTATUS:CONFIRMED\nSUMMARY:A Block\nTRANSP:OPAQUE\nEND:VEVENT\nEND:VCALENDAR\n";
+let EVENTS = parseICS(PRELOADED_ICS);
+
+
+
+
+
+
+
+
+
+// ══════════════════════════════════════
+// MAIN LOOP
+// ══════════════════════════════════════
+function tick() {
   updateClock();
-  const now=new Date();
-  const dayNum=getBlockDay(now);
-  renderMain(dayNum);
-  renderTodaySidebar();
+  if (EVENTS.length) {
+    renderMain(EVENTS);
+    renderSidebar(EVENTS);
+  }
 }
 
 tick();
-setInterval(tick,1000);
+setInterval(tick, 1000);
 </script>
 </body>
 </html>
+hrs-live-display-v2 (2).html
+Displaying hrs-live-display-v2 (2).html.
